@@ -47,6 +47,18 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
+const generateId = () => {
+  return Math.floor(Math.random() * 10000 + 1);
+};
+
+app.post("/api/persons", (request, response) => {
+  const payload = request.body;
+  const id = generateId();
+  payload.id = id;
+  data = data.concat(payload);
+  response.json(payload);
+});
+
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const dataEntry = data.find((entry) => entry.id === id);
