@@ -53,10 +53,16 @@ const generateId = () => {
 
 app.post("/api/persons", (request, response) => {
   const payload = request.body;
-  const id = generateId();
-  payload.id = id;
-  data = data.concat(payload);
-  response.json(payload);
+  if (!payload.name || !payload.number) {
+    response.status(400).json({ error: "Missing content" });
+  } else if (data.some((entry) => entry.name === payload.name)) {
+    response.status(400).json({ error: "Name must be unique" });
+  } else {
+    const id = generateId();
+    payload.id = id;
+    data = data.concat(payload);
+    response.json(payload);
+  }
 });
 
 app.delete("/api/persons/:id", (request, response) => {
