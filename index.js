@@ -3,7 +3,7 @@ const app = express();
 
 app.use(express.json());
 
-const data = [
+let data = [
   {
     id: 1,
     name: "Arto Hellas",
@@ -44,6 +44,17 @@ app.get("/api/persons/:id", (request, response) => {
     response.status(404).end();
   } else {
     response.json(dataEntry);
+  }
+});
+
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const dataEntry = data.find((entry) => entry.id === id);
+  if (!dataEntry) {
+    response.status(404).end();
+  } else {
+    data = data.filter((entry) => entry.id !== id);
+    response.status(204).end();
   }
 });
 
