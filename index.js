@@ -43,21 +43,18 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-const generateId = () => {
-  return Math.floor(Math.random() * 10000 + 1);
-};
-
 app.post("/api/persons", (request, response) => {
   const payload = request.body;
   if (!payload.name || !payload.number) {
     response.status(400).json({ error: "Missing content" });
-  } else if (data.some((entry) => entry.name === payload.name)) {
-    response.status(400).json({ error: "Name must be unique" });
   } else {
-    const id = generateId();
-    payload.id = id;
-    data = data.concat(payload);
-    response.json(payload);
+    const personToSave = new Person({
+      name: payload.name,
+      number: payload.number,
+    });
+    personToSave.save(personToSave).then((savedPerson) => {
+      response.json(savedPerson);
+    });
   }
 });
 
