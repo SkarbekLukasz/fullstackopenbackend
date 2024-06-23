@@ -20,30 +20,38 @@ app.use(
   )
 );
 
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((data) => {
-    response.json(data);
-  });
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((data) => {
+      response.json(data);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/info", (request, response) => {
-  const phonebookSize = data.length;
-  const timestamp = new Date().toString();
-  const payload = `<p>Phonebook has info for ${phonebookSize} people</p><p>${timestamp}</p>`;
-  response.send(payload);
+app.get("/info", (request, response, next) => {
+  Person.find({})
+    .then((persons) => {
+      const phonebookSize = persons.length;
+      const timestamp = new Date().toString();
+      const payload = `<p>Phonebook has info for ${phonebookSize} people</p><p>${timestamp}</p>`;
+      response.send(payload);
+    })
+    .catch((error) => next(error));
 });
 
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const dataEntry = data.find((entry) => entry.id === id);
-  if (!dataEntry) {
-    response.status(404).end();
-  } else {
-    response.json(dataEntry);
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const payload = request.body;
   if (!payload.name || !payload.number) {
     response.status(400).json({ error: "Missing content" });
@@ -52,9 +60,12 @@ app.post("/api/persons", (request, response) => {
       name: payload.name,
       number: payload.number,
     });
-    personToSave.save(personToSave).then((savedPerson) => {
-      response.json(savedPerson);
-    });
+    personToSave
+      .save(personToSave)
+      .then((savedPerson) => {
+        response.json(savedPerson);
+      })
+      .catch((error) => next(error));
   }
 });
 
