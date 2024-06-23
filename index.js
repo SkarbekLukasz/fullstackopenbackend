@@ -59,14 +59,9 @@ app.post("/api/persons", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const dataEntry = data.find((entry) => entry.id === id);
-  if (!dataEntry) {
-    response.status(404).end();
-  } else {
-    data = data.filter((entry) => entry.id !== id);
+  Person.findByIdAndDelete(request.params.id).then((resp) => {
     response.status(204).end();
-  }
+  });
 });
 
 const unknownEndpoint = (request, response) => {
