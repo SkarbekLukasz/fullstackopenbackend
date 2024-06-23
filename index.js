@@ -58,10 +58,29 @@ app.post("/api/persons", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
-  Person.findByIdAndDelete(request.params.id).then((resp) => {
-    response.status(204).end();
-  });
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((resp) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+  const payload = request.body;
+  if (!payload.name || !payload.number) {
+    response.status(400).json({ error: "Missing content" });
+  } else {
+    const personToUpdate = {
+      name: payload.name,
+      number: payload.number,
+    };
+    Person.findByIdAndUpdate(request.params.id, personToUpdate, { new: true })
+      .then((updatedPerson) => {
+        response.json(updatedPerson);
+      })
+      .catch((error) => next(error));
+  }
 });
 
 const unknownEndpoint = (request, response) => {
@@ -69,6 +88,18 @@ const unknownEndpoint = (request, response) => {
 };
 
 app.use(unknownEndpoint);
+
+const errorHandling = (error, request, response, next) => {
+  console.error(error.message);
+
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "Malformed id" });
+  }
+
+  next(error);
+};
+
+app.use(errorHandling);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
